@@ -21,12 +21,45 @@ service: serverless-aws-local
 frameworkVersion: "3"
 
 provider:
-    name: aws
-    runtime: nodejs18.x
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: us-east-1
 
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+plugins:
+  - serverless-dynamodb
+  - serverless-offline
+
+custom:
+  dynamodb:
+    start:
+      migrate: true
+    stages:
+      - dev
+  serverless-dynamodb:
+    port: 8000
+    docker: false
+    start: 
+      migrate: true
+      host: 127.0.0.1
+    stages:
+      -dev
+	
+resources: # CloudFormation template syntax
+  Resources:
+    YourTableName:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: usersTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
@@ -59,12 +92,11 @@ provider:
 #    - include-me-dir/**
 
 functions:
-    hello:
-        handler: handler.hello
-        events:
-            - http:
-                path: /test
-                method: get
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi: 'GET /test'
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -100,11 +132,9 @@ functions:
 #          conditions:
 #            host: example.com
 #            path: /hello
-
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
-
 # you can add CloudFormation resource templates here
 #resources:
 #  Resources:
@@ -116,6 +146,3 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
-
-plugins:
- - serverless-offline

@@ -4,11 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "run-p localdb:* dev",
+    "dev": "sls offline",
+    "localdb:start": "sls dynamodb start --sharedDb",
+    "localdb:admin": "export DYNAMO_ENDPOINT=http://localhost:8000 && dynamodb-admin"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "dynamodb-admin": "^4.5.0",
+    "serverless": "^3.34.0",
+    "serverless-dynamodb": "^0.2.43",
     "serverless-offline": "^12.0.4"
   }
 }
